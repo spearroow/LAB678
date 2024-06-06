@@ -1,0 +1,37 @@
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 2 * * 1' # Co poniedziałek o 2:00 UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Run installResources.ps1
+        shell: pwsh
+        run: .\installResources.ps1
+
+      - name: Build executable
+        run: pyinstaller --onefile main.py # Zmień main.py na plik wejściowy Twojego skryptu
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my_executable
+          path: dist/main.exe # Zmień na ścieżkę do wygenerowanego pliku .exe
